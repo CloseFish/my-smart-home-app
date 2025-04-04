@@ -14,7 +14,7 @@ import {
   faTabletAlt, faMagic, faUser
 } from "@fortawesome/free-solid-svg-icons";
 import dynamic from "next/dynamic";
-import DraggableQuickControls from "./DraggableQuickControls";
+import DraggableDevices from "./DraggableDevices";
 import DraggableRooms from "./DraggableRooms";
 
 const DraggableScenes = dynamic(() => import("@/components/DraggableScenes"), { ssr: false });
@@ -109,7 +109,7 @@ const SmartHome: React.FC = () => {
             <DraggableRooms rooms={rooms} />
 
             {/* 快捷控制 */}
-            <DraggableQuickControls
+            <DraggableDevices
               devices={devices}
               onDeviceStatusChange={handleDeviceStatusChange}
             />
