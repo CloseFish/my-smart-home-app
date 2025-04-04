@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState } from "react";
+import React from "react";
 import { Switch } from "@/components/ui/switch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,10 +10,9 @@ import {
 	faTemperatureHigh
 } from "@fortawesome/free-solid-svg-icons";
 
-// 定义 device 对象的类型
 type Device = {
 	status: boolean;
-	icon: any; // 这里使用 any 类型，因为 FontAwesomeIcon 的 icon 属性类型较复杂，可根据实际情况细化
+	icon: any;
 	name: string;
 };
 
@@ -24,9 +22,7 @@ type DeviceSwitchProps = {
 };
 
 const DeviceSwitch: React.FC<DeviceSwitchProps> = ({ device, onStatusChange }) => {
-	const handleSwitchChange = () => {
-		console.log('Switch changed in DeviceSwitch component');
-		const newStatus = !device.status; // 直接基于 props.device.status 取反
+	const handleSwitchChange = (newStatus: boolean) => {
 		onStatusChange(newStatus);
 	};
 
@@ -44,12 +40,12 @@ const DeviceSwitch: React.FC<DeviceSwitchProps> = ({ device, onStatusChange }) =
 				</div>
 			</div>
 			<Switch
-				checked={device.status} // 直接使用 props.device.status
-				onCheckedChange={handleSwitchChange} // `onChange` 改为 `onCheckedChange`
+				checked={device.status}
+				onCheckedChange={handleSwitchChange}
+				onClick={(e) => e.stopPropagation()} // 阻止事件冒泡
 			/>
 		</div>
 	);
 };
-
 
 export default DeviceSwitch;

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import { Card } from "@/components/ui/card";
 import DeviceSwitch from "./DeviceSwitch";
 import {
@@ -13,29 +13,41 @@ import {
 import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-const DraggableDevices: React.FC<{
-	devices: any[];
-	onDeviceStatusChange: (deviceName: string, newStatus: boolean) => void;
-}> = ({ devices, onDeviceStatusChange }) => {
-	const [draggableDevices, setDraggableDevices] = useState(devices);
+interface Device {
+	name: string;
+	icon: any;
+	status: boolean;
+}
 
+interface DraggableDevicesProps {
+	devices: Device[];
+	onDeviceStatusChange: (deviceName: string, newStatus: boolean) => void;
+}
+
+const DraggableDevices: React.FC<DraggableDevicesProps> = ({ devices, onDeviceStatusChange }) => {
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
-			activationConstraint: { delay: 300, tolerance: 5 },
+			activationConstraint: {
+				delay: 300, // 长按300ms触发拖拽
+				tolerance: 5,
+			},
 		}),
 		useSensor(TouchSensor, {
-			activationConstraint: { delay: 300, tolerance: 5 },
+			activationConstraint: {
+				delay: 300, // 长按300ms触发拖拽
+				tolerance: 5,
+			},
 		})
 	);
 
 	const handleDragEnd = (event: any) => {
 		const { active, over } = event;
 		if (active.id !== over.id) {
-			setDraggableDevices((prev) => {
-				const oldIndex = prev.findIndex((device) => device.name === active.id);
-				const newIndex = prev.findIndex((device) => device.name === over.id);
-				return arrayMove(prev, oldIndex, newIndex);
-			});
+			const oldIndex = devices.findIndex((device) => device.name === active.id);
+			const newIndex = devices.findIndex((device) => device.name === over.id);
+			const newDevices = arrayMove(devices, oldIndex, newIndex);
+			// 这里需要通知父组件更新设备顺序
+			// onDevicesOrderChange(newDevices);
 		}
 	};
 
@@ -44,11 +56,11 @@ const DraggableDevices: React.FC<{
 			<h2 className="text-lg font-medium mb-4">快捷控制</h2>
 			<DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
 				<SortableContext
-					items={draggableDevices.map((device) => device.name)}
+					items={devices.map((device) => device.name)}
 					strategy={rectSortingStrategy}
 				>
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-						{draggableDevices.map((device) => (
+						{devices.map((device) => (
 							<SortableDevice
 								key={device.name}
 								id={device.name}
@@ -65,54 +77,49 @@ const DraggableDevices: React.FC<{
 	);
 };
 
-const SortableDevice: React.FC<{
+interface SortableDeviceProps {
 	id: string;
-	device: any;
+	device: Device;
 	onStatusChange: (newStatus: boolean) => void;
-}> = ({ id, device, onStatusChange }) => {
-	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-	const longPressRef = useRef<NodeJS.Timeout | null>(null);
-	const isLongPress = useRef(false);
+}
 
-	const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-		longPressRef.current = setTimeout(() => {
-			isLongPress.current = true;
-			if (listeners && listeners.onMouseDown) {
-				listeners.onMouseDown(e);
-			}
-		}, 300);
+const SortableDevice: React.FC<SortableDeviceProps> = ({ id, device, onStatusChange }) => {
+	const switchRef = useRef<HTMLDivElement>(null);
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+	} = useSortable({ id });
+
+	// 检查点击是否发生在开关区域
+	const isClickOnSwitch = (e: React.MouseEvent) => {
+		if (!switchRef.current) return false;
+		return switchRef.current.contains(e.target as Node);
 	};
-
-	const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (longPressRef.current) {
-			clearTimeout(longPressRef.current);
-			longPressRef.current = null;
-		}
-		if (!isLongPress.current) {
-			onStatusChange(!device.status);
-		}
-		isLongPress.current = false;
-	};
-
-	useEffect(() => {
-		return () => {
-			if (longPressRef.current) {
-				clearTimeout(longPressRef.current);
-			}
-		};
-	}, []);
 
 	return (
 		<Card
 			ref={setNodeRef}
+			style={{
+				transform: CSS.Transform.toString(transform),
+				transition,
+				cursor: 'grab', // 显示可拖拽的手型光标
+			}}
 			{...attributes}
-			onMouseDown={handleMouseDown}
-			onMouseUp={handleMouseUp}
+			className="p-4 bg-white hover:shadow-md transition-shadow relative"
 			{...listeners}
-			className="p-4 bg-white hover:shadow-md transition-shadow"
-			style={{ transform: CSS.Transform.toString(transform), transition }}
+			onClick={(e) => {
+				// 如果点击的是开关区域，阻止拖拽
+				if (isClickOnSwitch(e)) {
+					e.stopPropagation();
+				}
+			}}
 		>
-			<DeviceSwitch device={device} onStatusChange={onStatusChange} />
+			<div ref={switchRef}>
+				<DeviceSwitch device={device} onStatusChange={onStatusChange} />
+			</div>
 		</Card>
 	);
 };

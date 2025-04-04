@@ -15,10 +15,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import dynamic from "next/dynamic";
 
-import DraggableRooms from "./DraggableRooms";
-
 const DraggableScenes = dynamic(() => import("@/components/DraggableScenes"), { ssr: false });
 const DraggableDevices = dynamic(() => import('@/components/DraggableDevices'), { ssr: false });
+const DraggableRooms = dynamic(() => import('@/components/DraggableRooms'), { ssr: false });
 
 
 
