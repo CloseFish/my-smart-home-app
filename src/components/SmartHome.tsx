@@ -15,6 +15,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import dynamic from "next/dynamic";
 import DraggableQuickControls from "./DraggableQuickControls";
+import DraggableRooms from "./DraggableRooms";
 
 const DraggableScenes = dynamic(() => import("@/components/DraggableScenes"), { ssr: false });
 
@@ -105,33 +106,7 @@ const SmartHome: React.FC = () => {
           {/* 左侧内容 */}
           <div className="flex-1">
             {/* 房间选择 */}
-            <div className="mb-8">
-              <h2 className="text-lg font-medium mb-4">房间</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {rooms.map((room) => (
-                  <Card
-                    key={room.name}
-                    className={`overflow-hidden border border-[#E0E0E0] ${room.active ? "ring-1 ring-[#B07C5B]" : ""}`}
-                  >
-                    <div className="relative h-[140px]">
-                      <Image
-                        src={room.image}
-                        alt={room.name}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-3 flex items-center">
-                      <div className="font-medium text-[#B07C5B] flex items-center">
-                        <FontAwesomeIcon icon={faDoorOpen} className="text-xs mr-1" />
-                        <span>{room.name}</span>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
+            <DraggableRooms rooms={rooms} />
 
             {/* 快捷控制 */}
             <DraggableQuickControls

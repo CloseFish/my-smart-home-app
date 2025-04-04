@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import DeviceSwitch from "./DeviceSwitch";
 import {
@@ -13,15 +13,19 @@ import {
 import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-const DraggableQuickControls: React.FC<{ devices: any[]; onDeviceStatusChange: (deviceName: string, newStatus: boolean) => void }> = ({
-	devices,
-	onDeviceStatusChange,
-}) => {
+const DraggableQuickControls: React.FC<{
+	devices: any[];
+	onDeviceStatusChange: (deviceName: string, newStatus: boolean) => void;
+}> = ({ devices, onDeviceStatusChange }) => {
 	const [draggableDevices, setDraggableDevices] = useState(devices);
 
 	const sensors = useSensors(
-		useSensor(PointerSensor),
-		useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
+		useSensor(PointerSensor, {
+			activationConstraint: { delay: 300, tolerance: 5 },
+		}),
+		useSensor(TouchSensor, {
+			activationConstraint: { delay: 300, tolerance: 5 },
+		})
 	);
 
 	const handleDragEnd = (event: any) => {
@@ -49,7 +53,9 @@ const DraggableQuickControls: React.FC<{ devices: any[]; onDeviceStatusChange: (
 								key={device.name}
 								id={device.name}
 								device={device}
-								onStatusChange={(newStatus) => onDeviceStatusChange(device.name, newStatus)}
+								onStatusChange={(newStatus) =>
+									onDeviceStatusChange(device.name, newStatus)
+								}
 							/>
 						))}
 					</div>
@@ -65,11 +71,43 @@ const SortableDevice: React.FC<{
 	onStatusChange: (newStatus: boolean) => void;
 }> = ({ id, device, onStatusChange }) => {
 	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+	const longPressRef = useRef<NodeJS.Timeout | null>(null);
+	const isLongPress = useRef(false);
+
+	const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+		longPressRef.current = setTimeout(() => {
+			isLongPress.current = true;
+			if (listeners && listeners.onMouseDown) {
+				listeners.onMouseDown(e);
+			}
+		}, 300);
+	};
+
+	const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
+		if (longPressRef.current) {
+			clearTimeout(longPressRef.current);
+			longPressRef.current = null;
+		}
+		if (!isLongPress.current) {
+			onStatusChange(!device.status);
+		}
+		isLongPress.current = false;
+	};
+
+	useEffect(() => {
+		return () => {
+			if (longPressRef.current) {
+				clearTimeout(longPressRef.current);
+			}
+		};
+	}, []);
 
 	return (
 		<Card
 			ref={setNodeRef}
 			{...attributes}
+			onMouseDown={handleMouseDown}
+			onMouseUp={handleMouseUp}
 			{...listeners}
 			className="p-4 bg-white hover:shadow-md transition-shadow"
 			style={{ transform: CSS.Transform.toString(transform), transition }}
