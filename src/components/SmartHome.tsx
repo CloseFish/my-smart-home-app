@@ -15,6 +15,7 @@ import {
   faTemperatureHigh, faCloudSun, faBell, faCog, faChevronRight,
   faTabletAlt, faMagic, faUser
 } from "@fortawesome/free-solid-svg-icons";
+import DraggableScenes from "@/components/DraggableScenes";
 
 const SmartHome: React.FC = () => {
   const [rooms] = useState([
@@ -150,21 +151,7 @@ const SmartHome: React.FC = () => {
           {/* 右侧场景模式 */}
           <div className="w-full lg:w-[320px]">
             <h2 className="text-lg font-medium mb-4">智能场景</h2>
-            <div className="space-y-4">
-              {scenes.map((scene) => (
-                <Button
-                  key={scene.name}
-                  variant="outline"
-                  className="w-full h-auto py-4 flex items-center gap-4 rounded-lg"
-                >
-                  <div className="w-12 h-12 rounded-full bg-[#F6EBE1] flex items-center justify-center">
-                    <FontAwesomeIcon icon={scene.icon} className="text-[#B07C5B] text-lg" />
-                  </div>
-                  <span className="flex-1 text-left">{scene.name}</span>
-                  <FontAwesomeIcon icon={faChevronRight} className="text-gray-400" />
-                </Button>
-              ))}
-            </div>
+            <DraggableScenes />
           </div>
         </div>
       </main>
