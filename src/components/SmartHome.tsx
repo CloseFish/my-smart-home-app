@@ -14,10 +14,13 @@ import {
   faTabletAlt, faMagic, faUser
 } from "@fortawesome/free-solid-svg-icons";
 import dynamic from "next/dynamic";
-import DraggableDevices from "./DraggableDevices";
+
 import DraggableRooms from "./DraggableRooms";
 
 const DraggableScenes = dynamic(() => import("@/components/DraggableScenes"), { ssr: false });
+const DraggableDevices = dynamic(() => import('@/components/DraggableDevices'), { ssr: false });
+
+
 
 const SmartHome: React.FC = () => {
   const [rooms] = useState([

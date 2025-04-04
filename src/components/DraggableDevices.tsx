@@ -13,7 +13,7 @@ import {
 import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-const DraggableQuickControls: React.FC<{
+const DraggableDevices: React.FC<{
 	devices: any[];
 	onDeviceStatusChange: (deviceName: string, newStatus: boolean) => void;
 }> = ({ devices, onDeviceStatusChange }) => {
@@ -117,4 +117,4 @@ const SortableDevice: React.FC<{
 	);
 };
 
-export default DraggableQuickControls;
+export default DraggableDevices;
