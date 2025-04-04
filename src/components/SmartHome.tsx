@@ -1,11 +1,9 @@
-"use client"
-
+"use client";
 import React, { useState } from "react";
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import DeviceSwitch from "./DeviceSwitch"; // 导入新组件
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -16,6 +14,7 @@ import {
   faTabletAlt, faMagic, faUser
 } from "@fortawesome/free-solid-svg-icons";
 import dynamic from "next/dynamic";
+import DraggableQuickControls from "./DraggableQuickControls";
 
 const DraggableScenes = dynamic(() => import("@/components/DraggableScenes"), { ssr: false });
 
@@ -66,7 +65,7 @@ const SmartHome: React.FC = () => {
       const updatedDevices = prevDevices.map(device =>
         device.name === deviceName ? { ...device, status: newStatus } : device
       );
-      console.log("Updated devices:", updatedDevices); // 确保 log 里看到最新数据
+      console.log("Updated devices:", updatedDevices);
       return updatedDevices;
     });
   };
@@ -135,24 +134,14 @@ const SmartHome: React.FC = () => {
             </div>
 
             {/* 快捷控制 */}
-            <div>
-              <h2 className="text-lg font-medium mb-4">快捷控制</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {devices.map((device) => (
-                  <Card key={device.name} className="p-4 bg-white hover:shadow-md transition-shadow">
-                    <DeviceSwitch
-                      device={device}
-                      onStatusChange={(newStatus) => handleDeviceStatusChange(device.name, newStatus)}
-                    /> {/* 使用新组件 */}
-                  </Card>
-                ))}
-              </div>
-            </div>
+            <DraggableQuickControls
+              devices={devices}
+              onDeviceStatusChange={handleDeviceStatusChange}
+            />
           </div>
 
           {/* 右侧场景模式 */}
           <div className="w-full lg:w-[320px]">
-            <h2 className="text-lg font-medium mb-4">智能场景</h2>
             <DraggableScenes />
           </div>
         </div>

@@ -12,7 +12,7 @@ import {
 	PointerSensor,
 	TouchSensor,
 } from "@dnd-kit/core";
-import { SortableContext, useSortable, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 const SortableScenes: React.FC = () => {
@@ -44,7 +44,7 @@ const SortableScenes: React.FC = () => {
 		<div>
 			<h2 className="text-lg font-medium mb-4">智能场景</h2>
 			<DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
-				<SortableContext items={scenes.map((scene) => scene.id)} strategy={verticalListSortingStrategy}>
+				<SortableContext items={scenes.map((scene) => scene.id)} strategy={rectSortingStrategy}>
 					<div className="space-y-4">
 						{scenes.map((scene) => (
 							<SortableScene key={scene.id} id={scene.id} name={scene.name} icon={scene.icon} />
@@ -66,7 +66,10 @@ const SortableScene: React.FC<{ id: string; name: string; icon: any }> = ({ id, 
 			{...listeners}
 			variant="outline"
 			className="w-full h-auto py-4 flex items-center gap-4 rounded-lg cursor-grab active:cursor-grabbing"
-			style={{ transform: CSS.Transform.toString(transform), transition }}
+			style={{
+				transform: CSS.Transform.toString(transform),
+				transition
+			}}
 		>
 			<div className="w-12 h-12 rounded-full bg-[#F6EBE1] flex items-center justify-center">
 				<FontAwesomeIcon icon={icon} className="text-[#B07C5B] text-lg" />
