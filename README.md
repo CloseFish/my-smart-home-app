@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-# my-smart-home-app-main
-=======
->>>>>>> b0c4e73 (解决了底部导航遮挡主要内容的问题 20250404_1810)
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -40,7 +34,3 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-<<<<<<< HEAD
-=======
->>>>>>> 6c349f5 (switch function completed 20250404_1730)
->>>>>>> b0c4e73 (解决了底部导航遮挡主要内容的问题 20250404_1810)
