@@ -15,7 +15,9 @@ import {
   faTemperatureHigh, faCloudSun, faBell, faCog, faChevronRight,
   faTabletAlt, faMagic, faUser
 } from "@fortawesome/free-solid-svg-icons";
-import DraggableScenes from "@/components/DraggableScenes";
+import dynamic from "next/dynamic";
+
+const DraggableScenes = dynamic(() => import("@/components/DraggableScenes"), { ssr: false });
 
 const SmartHome: React.FC = () => {
   const [rooms] = useState([
