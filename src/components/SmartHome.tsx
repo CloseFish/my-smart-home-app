@@ -98,11 +98,7 @@ const SmartHome: React.FC = () => {
       </div>
 
       {/* 主要内容区 */}
-<<<<<<< HEAD
-      <main className="max-w-7xl mx-auto px-4 py-6">
-=======
       <main className="max-w-7xl mx-auto px-4 py-6 pb-20">
->>>>>>> b0c4e73 (解决了底部导航遮挡主要内容的问题 20250404_1810)
         <div className="flex flex-col lg:flex-row gap-6">
           {/* 左侧内容 */}
           <div className="flex-1">
