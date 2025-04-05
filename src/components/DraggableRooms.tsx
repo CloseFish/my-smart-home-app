@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDoorOpen } from "@fortawesome/free-solid-svg-icons";
@@ -20,22 +19,19 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-const DraggableRooms: React.FC<{ rooms: any[] }> = ({ rooms }) => {
-	const [draggableRooms, setDraggableRooms] = useState(rooms);
+const DraggableRooms = ({ rooms: initialRooms }: { rooms: any[] }) => {
+	const [rooms, setRooms] = useState(initialRooms);
+	const [hoveredRoom, setHoveredRoom] = useState<string | null>(null);
 
 	const sensors = useSensors(
-		useSensor(PointerSensor, {
-			activationConstraint: { delay: 300, tolerance: 5 },
-		}),
-		useSensor(TouchSensor, {
-			activationConstraint: { delay: 300, tolerance: 5 },
-		})
+		useSensor(PointerSensor),
+		useSensor(TouchSensor)
 	);
 
 	const handleDragEnd = (event: any) => {
 		const { active, over } = event;
 		if (active.id !== over.id) {
-			setDraggableRooms((prev) => {
+			setRooms((prev) => {
 				const oldIndex = prev.findIndex((room) => room.name === active.id);
 				const newIndex = prev.findIndex((room) => room.name === over.id);
 				return arrayMove(prev, oldIndex, newIndex);
@@ -44,20 +40,25 @@ const DraggableRooms: React.FC<{ rooms: any[] }> = ({ rooms }) => {
 	};
 
 	return (
-		<div>
+		<div className="mb-8">
 			<h2 className="text-lg font-medium mb-4">房间</h2>
 			<DndContext
 				collisionDetection={closestCenter}
 				onDragEnd={handleDragEnd}
 				sensors={sensors}
 			>
-				<SortableContext
-					items={draggableRooms.map((room) => room.name)}
-					strategy={rectSortingStrategy}
-				>
-					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-						{draggableRooms.map((room) => (
-							<SortableRoom key={room.name} id={room.name} room={room} />
+				<SortableContext items={rooms.map((room) => room.name)} strategy={rectSortingStrategy}>
+					<div className="grid grid-cols-2 gap-4">
+						{rooms.map((room) => (
+							<SortableRoom
+								key={room.name}
+								id={room.name}
+								room={room}
+								isHovered={hoveredRoom === room.name}
+								onHoverChange={(hover) =>
+									hover ? setHoveredRoom(room.name) : setHoveredRoom(null)
+								}
+							/>
 						))}
 					</div>
 				</SortableContext>
@@ -66,7 +67,17 @@ const DraggableRooms: React.FC<{ rooms: any[] }> = ({ rooms }) => {
 	);
 };
 
-const SortableRoom: React.FC<{ id: string; room: any }> = ({ id, room }) => {
+const SortableRoom = ({
+	id,
+	room,
+	isHovered,
+	onHoverChange,
+}: {
+	id: string;
+	room: any;
+	isHovered: boolean;
+	onHoverChange: (hover: boolean) => void;
+}) => {
 	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
 	return (
@@ -74,32 +85,38 @@ const SortableRoom: React.FC<{ id: string; room: any }> = ({ id, room }) => {
 			ref={setNodeRef}
 			{...attributes}
 			{...listeners}
-			className={`relative overflow-hidden rounded-xl ${room.active ? "ring-2 ring-[#B07C5B] ring-offset-2" : ""
-				}`}
+			className="relative rounded-xl overflow-hidden border-2 border-transparent transition-all duration-300"
 			style={{
 				transform: CSS.Transform.toString(transform),
 				transition,
-				width: '100%',
-				height: '220px'
+				height: "220px",
+				borderColor: isHovered ? "#B07C5B" : "transparent"
 			}}
+			onMouseEnter={() => onHoverChange(true)}
+			onMouseLeave={() => onHoverChange(false)}
 		>
-			{/* 图片区域 - 直接占满整个容器 */}
-			<div className="absolute inset-0">
-				<Image
-					src={room.image}
-					alt={room.name}
-					fill
-					className="object-cover"
-					style={{ margin: 0 }}
-				/>
+			{/* 固定外框作为蒙版 */}
+			<div className="absolute inset-0 rounded-xl overflow-hidden">
+				{/* 可放大的图片内容 */}
+				<div
+					className="absolute inset-0 transition-transform duration-300"
+					style={{
+						transform: isHovered ? "scale(1.1)" : "scale(1)",
+						zIndex: 1
+					}}
+				>
+					<Image
+						src={room.image}
+						alt={room.name}
+						fill
+						className="object-cover"
+					/>
+				</div>
 			</div>
 
-			{/* 底部信息条 - 直接覆盖在图片上 */}
-			<div className="absolute bottom-0 left-0 right-0 h-12 bg-[#F6EBE1]/90 backdrop-blur-sm flex items-center px-3">
-				<FontAwesomeIcon
-					icon={faDoorOpen}
-					className="text-xs mr-2 text-[#B07C5B]"
-				/>
+			{/* 底部信息条（固定在蒙版内） */}
+			<div className="absolute bottom-0 left-0 right-0 h-12 bg-[#F6EBE1]/90 backdrop-blur-sm flex items-center px-3 z-10">
+				<FontAwesomeIcon icon={faDoorOpen} className="text-xs mr-2 text-[#B07C5B]" />
 				<span className="font-medium text-[#B07C5B]">{room.name}</span>
 			</div>
 		</div>
