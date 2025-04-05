@@ -97,7 +97,7 @@ const SortableRoom = ({
 	isHovered: boolean;
 	onHoverChange: (hover: boolean) => void;
 }) => {
-	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 	const longPressRef = useRef<NodeJS.Timeout | null>(null);
 	const isLongPress = useRef(false);
 
@@ -132,7 +132,8 @@ const SortableRoom = ({
 			style={{
 				transform: CSS.Transform.toString(transform),
 				transition,
-				cursor: isLongPress.current ? 'grabbing' : 'grab'
+				cursor: isLongPress.current ? 'grabbing' : 'grab',
+				zIndex: isDragging ? 999 : 1 // 当拖拽时，设置 z-index 为 999，否则为 1
 			}}
 			className="relative"
 			{...attributes}

@@ -83,18 +83,23 @@ const SmartHome: React.FC = () => {
   };
 
   const bottomNavRef = useRef<HTMLDivElement | null>(null);
+  const topNavRef = useRef<HTMLDivElement | null>(null);
   const [bottomNavHeight, setBottomNavHeight] = useState(0);
+  const [topNavHeight, setTopNavHeight] = useState(0);
 
   useEffect(() => {
     if (bottomNavRef.current) {
       setBottomNavHeight(bottomNavRef.current.offsetHeight);
     }
-  }, [bottomNavRef]);
+    if (topNavRef.current) {
+      setTopNavHeight(topNavRef.current.offsetHeight);
+    }
+  }, [bottomNavRef, topNavRef]);
 
   return (
     <div className="min-h-screen bg-[#F9F9F9] relative">
       {/* 顶部导航 */}
-      <div className="bg-white p-4 rounded-b-xl shadow-sm">
+      <div ref={topNavRef} className="bg-white p-4 rounded-b-xl shadow-sm fixed top-0 left-0 right-0 z-100">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Avatar className="h-10 w-10">
@@ -121,7 +126,11 @@ const SmartHome: React.FC = () => {
       </div>
 
       {/* 主要内容区，添加米黄色背景 */}
-      <main className="max-w-7xl mx-auto px-4 py-6 pb-20 bg-[#F6EBE1] relative" style={{ paddingBottom: bottomNavHeight + 10, zIndex: 1 }}>
+      <main className="max-w-7xl mx-auto px-4 py-6 pb-20 bg-[#F6EBE1] relative" style={{
+        paddingTop: topNavHeight + 10,
+        paddingBottom: bottomNavHeight + 10,
+        zIndex: 1
+      }}>
         <div className="flex flex-col lg:flex-row gap-6">
           {/* 左侧内容 */}
           <div className="flex-1">
