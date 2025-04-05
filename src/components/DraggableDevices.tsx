@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import DeviceSwitch from "./DeviceSwitch";
 import {
@@ -26,6 +26,13 @@ interface DraggableDevicesProps {
 }
 
 const DraggableDevices: React.FC<DraggableDevicesProps> = ({ devices, onDeviceStatusChange, onDevicesOrderChange }) => {
+	// 从 localStorage 中读取数据并反序列化
+	const storedDevices = localStorage.getItem('draggableDevices');
+	const initialState = storedDevices ? JSON.parse(storedDevices) as Device[] : devices;
+
+	// 声明状态并使用初始数据初始化
+	const [draggableDevices, setDraggableDevices] = useState<Device[]>(initialState);
+
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
 			activationConstraint: {
@@ -44,11 +51,24 @@ const DraggableDevices: React.FC<DraggableDevicesProps> = ({ devices, onDeviceSt
 	const handleDragEnd = (event: any) => {
 		const { active, over } = event;
 		if (active.id !== over.id) {
-			const oldIndex = devices.findIndex((device) => device.name === active.id);
-			const newIndex = devices.findIndex((device) => device.name === over.id);
-			const newDevices = arrayMove(devices, oldIndex, newIndex);
+			const oldIndex = draggableDevices.findIndex((device) => device.name === active.id);
+			const newIndex = draggableDevices.findIndex((device) => device.name === over.id);
+			const newDevices = arrayMove(draggableDevices, oldIndex, newIndex);
+			setDraggableDevices(newDevices);
 			onDevicesOrderChange(newDevices); // 调用回调更新顺序
+			// 将新的顺序数据保存到 localStorage 中 20250406_0200
+			localStorage.setItem('draggableDevices', JSON.stringify(newDevices));
 		}
+	};
+
+	const handleDeviceStatusChange = (deviceName: string, newStatus: boolean) => {
+		const updatedDevices = draggableDevices.map((device) =>
+			device.name === deviceName ? { ...device, status: newStatus } : device
+		);
+		setDraggableDevices(updatedDevices);
+		onDeviceStatusChange(deviceName, newStatus);
+		// 将更新后的设备数据保存到 localStorage 中 20250406_0200
+		localStorage.setItem('draggableDevices', JSON.stringify(updatedDevices));
 	};
 
 	return (
@@ -56,17 +76,17 @@ const DraggableDevices: React.FC<DraggableDevicesProps> = ({ devices, onDeviceSt
 			<h2 className="text-lg font-medium mb-4">快捷控制</h2>
 			<DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
 				<SortableContext
-					items={devices.map((device) => device.name)}
+					items={draggableDevices.map((device) => device.name)}
 					strategy={rectSortingStrategy}
 				>
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-						{devices.map((device) => (
+						{draggableDevices.map((device) => (
 							<SortableDevice
 								key={device.name}
 								id={device.name}
 								device={device}
 								onStatusChange={(newStatus) =>
-									onDeviceStatusChange(device.name, newStatus)
+									handleDeviceStatusChange(device.name, newStatus)
 								}
 							/>
 						))}
@@ -126,4 +146,4 @@ const SortableDevice: React.FC<SortableDeviceProps> = ({ id, device, onStatusCha
 	);
 };
 
-export default DraggableDevices;    
+export default DraggableDevices;

@@ -20,15 +20,28 @@ import {
 import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+// 定义 Scene 类型
+type Scene = {
+	name: string;
+	icon: any;
+};
+
 const DraggableScenes: React.FC = () => {
-	const scenes = [
+	// 定义初始场景数据
+	const initialScenes: Scene[] = [
 		{ name: "回家模式", icon: faHome },
 		{ name: "离家模式", icon: faDoorOpen },
 		{ name: "睡眠模式", icon: faMoon },
 		{ name: "影院模式", icon: faFilm },
 		{ name: "会客模式", icon: faUsers }
 	];
-	const [draggableScenes, setDraggableScenes] = useState(scenes);
+
+	// 从 localStorage 中读取数据并反序列化 20250406_0155
+	const storedScenes = localStorage.getItem('draggableScenes');
+	const initialState = storedScenes ? JSON.parse(storedScenes) as Scene[] : initialScenes;
+
+	// 声明状态并使用初始数据初始化
+	const [draggableScenes, setDraggableScenes] = useState<Scene[]>(initialState);
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -42,10 +55,13 @@ const DraggableScenes: React.FC = () => {
 	const handleDragEnd = (event: any) => {
 		const { active, over } = event;
 		if (active.id !== over.id) {
-			setDraggableScenes((prev) => {
-				const oldIndex = prev.findIndex((scene) => scene.name === active.id);
-				const newIndex = prev.findIndex((scene) => scene.name === over.id);
-				return arrayMove(prev, oldIndex, newIndex);
+			setDraggableScenes((prev: Scene[]) => {
+				const oldIndex = prev.findIndex((scene: Scene) => scene.name === active.id);
+				const newIndex = prev.findIndex((scene: Scene) => scene.name === over.id);
+				const newScenes = arrayMove(prev, oldIndex, newIndex);
+				// 将新的顺序数据保存到 localStorage 中 20250406_0155
+				localStorage.setItem('draggableScenes', JSON.stringify(newScenes));
+				return newScenes;
 			});
 		}
 	};
@@ -55,11 +71,11 @@ const DraggableScenes: React.FC = () => {
 			<h2 className="text-lg font-medium mb-4">智能场景</h2>
 			<DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
 				<SortableContext
-					items={draggableScenes.map((scene) => scene.name)}
+					items={draggableScenes.map((scene: Scene) => scene.name)}
 					strategy={rectSortingStrategy}
 				>
 					<div className="grid grid-cols-1 gap-4">
-						{draggableScenes.map((scene) => (
+						{draggableScenes.map((scene: Scene) => (
 							<SortableScene key={scene.name} id={scene.name} scene={scene} />
 						))}
 					</div>
@@ -69,7 +85,7 @@ const DraggableScenes: React.FC = () => {
 	);
 };
 
-const SortableScene: React.FC<{ id: string; scene: any }> = ({ id, scene }) => {
+const SortableScene: React.FC<{ id: string; scene: Scene }> = ({ id, scene }) => {
 	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 	const longPressRef = useRef<NodeJS.Timeout | null>(null);
 	const isLongPress = useRef(false);
@@ -129,4 +145,4 @@ const SortableScene: React.FC<{ id: string; scene: any }> = ({ id, scene }) => {
 	);
 };
 
-export default DraggableScenes;    
+export default DraggableScenes;

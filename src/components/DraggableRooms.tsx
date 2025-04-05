@@ -19,8 +19,20 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-const DraggableRooms = ({ rooms: initialRooms }: { rooms: any[] }) => {
-	const [rooms, setRooms] = useState(initialRooms);
+// 定义 Room 类型
+type Room = {
+	name: string;
+	image: string;
+	active: boolean;
+};
+
+const DraggableRooms = ({ rooms: initialRooms }: { rooms: Room[] }) => {
+	// 从 localStorage 中读取数据并反序列化 20250406_0205
+	const storedRooms = localStorage.getItem('draggableRooms');
+	const initialState = storedRooms ? JSON.parse(storedRooms) as Room[] : initialRooms;
+
+	// 声明状态并使用初始数据初始化
+	const [rooms, setRooms] = useState<Room[]>(initialState);
 	const [hoveredRoom, setHoveredRoom] = useState<string | null>(null);
 
 	const sensors = useSensors(
@@ -38,7 +50,10 @@ const DraggableRooms = ({ rooms: initialRooms }: { rooms: any[] }) => {
 			setRooms((prev) => {
 				const oldIndex = prev.findIndex((room) => room.name === active.id);
 				const newIndex = prev.findIndex((room) => room.name === over.id);
-				return arrayMove(prev, oldIndex, newIndex);
+				const newRooms = arrayMove(prev, oldIndex, newIndex);
+				// 将新的顺序数据保存到 localStorage 中 20250406_0205
+				localStorage.setItem('draggableRooms', JSON.stringify(newRooms));
+				return newRooms;
 			});
 		}
 	};
@@ -78,7 +93,7 @@ const SortableRoom = ({
 	onHoverChange,
 }: {
 	id: string;
-	room: any;
+	room: Room;
 	isHovered: boolean;
 	onHoverChange: (hover: boolean) => void;
 }) => {
@@ -125,8 +140,7 @@ const SortableRoom = ({
 			onMouseLeave={() => !isLongPress.current && onHoverChange(false)}
 		>
 			<div
-				className={`rounded-xl overflow-hidden border-2 transition-all duration-300 ${isHovered ? "border-[#B07C5B]" : "border-transparent"
-					}`}
+				className={`rounded-xl overflow-hidden border-2 transition-all duration-300 ${isHovered ? "border-[#B07C5B]" : "border-transparent"}`}
 				style={{ height: "220px" }}
 				onMouseDown={handleMouseDown}
 				onMouseUp={handleMouseUp}
