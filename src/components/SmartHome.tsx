@@ -15,10 +15,16 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import dynamic from "next/dynamic";
 
+// 定义 Device 类型
+type Device = {
+  name: string;
+  icon: any;
+  status: boolean;
+};
+
 const DraggableScenes = dynamic(() => import("@/components/DraggableScenes"), { ssr: false });
 const DraggableDevices = dynamic(() => import('@/components/DraggableDevices'), { ssr: false });
 const DraggableRooms = dynamic(() => import('@/components/DraggableRooms'), { ssr: false });
-
 
 
 const SmartHome: React.FC = () => {
@@ -73,6 +79,10 @@ const SmartHome: React.FC = () => {
     });
   };
 
+  const handleDevicesOrderChange = (newDevices: Device[]) => {
+    setDevices(newDevices);
+  };
+
   return (
     <div className="min-h-screen bg-[#F9F9F9]">
       {/* 顶部导航 */}
@@ -114,6 +124,7 @@ const SmartHome: React.FC = () => {
             <DraggableDevices
               devices={devices}
               onDeviceStatusChange={handleDeviceStatusChange}
+              onDevicesOrderChange={handleDevicesOrderChange} // 传递回调
             />
           </div>
 

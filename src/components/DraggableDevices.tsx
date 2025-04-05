@@ -22,9 +22,10 @@ interface Device {
 interface DraggableDevicesProps {
 	devices: Device[];
 	onDeviceStatusChange: (deviceName: string, newStatus: boolean) => void;
+	onDevicesOrderChange: (newDevices: Device[]) => void; // 新增的回调
 }
 
-const DraggableDevices: React.FC<DraggableDevicesProps> = ({ devices, onDeviceStatusChange }) => {
+const DraggableDevices: React.FC<DraggableDevicesProps> = ({ devices, onDeviceStatusChange, onDevicesOrderChange }) => {
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
 			activationConstraint: {
@@ -46,8 +47,7 @@ const DraggableDevices: React.FC<DraggableDevicesProps> = ({ devices, onDeviceSt
 			const oldIndex = devices.findIndex((device) => device.name === active.id);
 			const newIndex = devices.findIndex((device) => device.name === over.id);
 			const newDevices = arrayMove(devices, oldIndex, newIndex);
-			// 这里需要通知父组件更新设备顺序
-			// onDevicesOrderChange(newDevices);
+			onDevicesOrderChange(newDevices); // 调用回调更新顺序
 		}
 	};
 
