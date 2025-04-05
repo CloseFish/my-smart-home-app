@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,7 +12,12 @@ import {
 	PointerSensor,
 	TouchSensor,
 } from "@dnd-kit/core";
-import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
+import {
+	SortableContext,
+	useSortable,
+	arrayMove,
+	rectSortingStrategy,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 const DraggableRooms: React.FC<{ rooms: any[] }> = ({ rooms }) => {
@@ -41,7 +46,11 @@ const DraggableRooms: React.FC<{ rooms: any[] }> = ({ rooms }) => {
 	return (
 		<div>
 			<h2 className="text-lg font-medium mb-4">房间</h2>
-			<DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
+			<DndContext
+				collisionDetection={closestCenter}
+				onDragEnd={handleDragEnd}
+				sensors={sensors}
+			>
 				<SortableContext
 					items={draggableRooms.map((room) => room.name)}
 					strategy={rectSortingStrategy}
@@ -59,63 +68,41 @@ const DraggableRooms: React.FC<{ rooms: any[] }> = ({ rooms }) => {
 
 const SortableRoom: React.FC<{ id: string; room: any }> = ({ id, room }) => {
 	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-	const longPressRef = useRef<NodeJS.Timeout | null>(null);
-	const isLongPress = useRef(false);
-
-	const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-		longPressRef.current = setTimeout(() => {
-			isLongPress.current = true;
-			if (listeners && listeners.onMouseDown) {
-				listeners.onMouseDown(e);
-			}
-		}, 300);
-	};
-
-	const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (longPressRef.current) {
-			clearTimeout(longPressRef.current);
-			longPressRef.current = null;
-		}
-		if (!isLongPress.current) {
-			// 短按逻辑可在此添加，暂时留空
-		}
-		isLongPress.current = false;
-	};
-
-	useEffect(() => {
-		return () => {
-			if (longPressRef.current) {
-				clearTimeout(longPressRef.current);
-			}
-		};
-	}, []);
 
 	return (
-		<Card
+		<div
 			ref={setNodeRef}
 			{...attributes}
-			onMouseDown={handleMouseDown}
-			onMouseUp={handleMouseUp}
 			{...listeners}
-			className={`overflow-hidden border border-[#E0E0E0] ${room.active ? "ring-1 ring-[#B07C5B]" : ""}`}
-			style={{ transform: CSS.Transform.toString(transform), transition }}
+			className={`relative overflow-hidden rounded-xl ${room.active ? "ring-2 ring-[#B07C5B] ring-offset-2" : ""
+				}`}
+			style={{
+				transform: CSS.Transform.toString(transform),
+				transition,
+				width: '100%',
+				height: '220px'
+			}}
 		>
-			<div className="relative h-[140px]">
+			{/* 图片区域 - 直接占满整个容器 */}
+			<div className="absolute inset-0">
 				<Image
 					src={room.image}
 					alt={room.name}
 					fill
-					sizes="(max-width: 768px) 100vw, 50vw"
 					className="object-cover"
+					style={{ margin: 0 }}
 				/>
 			</div>
-			<div className="p-3 flex items-center">
-				<div className="font-medium text-[#B07C5B] flex items-center">
-					<FontAwesomeIcon icon={faDoorOpen} className="text-xs mr-1" />
-					<span>{room.name}</span>
-				</div>
+
+			{/* 底部信息条 - 直接覆盖在图片上 */}
+			<div className="absolute bottom-0 left-0 right-0 h-12 bg-[#F6EBE1]/90 backdrop-blur-sm flex items-center px-3">
+				<FontAwesomeIcon
+					icon={faDoorOpen}
+					className="text-xs mr-2 text-[#B07C5B]"
+				/>
+				<span className="font-medium text-[#B07C5B]">{room.name}</span>
 			</div>
-		</Card>
+		</div>
 	);
 };
 
