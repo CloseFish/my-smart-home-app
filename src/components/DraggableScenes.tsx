@@ -118,7 +118,7 @@ const SortableScene: React.FC<{ id: string; scene: any }> = ({ id, scene }) => {
 				<div className="flex items-center justify-center bg-[#F6EBE1] rounded-full w-12 h-12 mr-3">
 					<FontAwesomeIcon icon={scene.icon} className="text-[#B07C5B] text-sm" />
 				</div>
-				<div className="font-medium text-[#B07C5B]">
+				<div className="font-medium">
 					<span>{scene.name}</span>
 				</div>
 			</div>

@@ -112,8 +112,8 @@ const SmartHome: React.FC = () => {
         </div>
       </div>
 
-      {/* 主要内容区 */}
-      <main className="max-w-7xl mx-auto px-4 py-6 pb-20">
+      {/* 主要内容区，添加米黄色背景 */}
+      <main className="max-w-7xl mx-auto px-4 py-6 pb-20 bg-[#F6EBE1]">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* 左侧内容 */}
           <div className="flex-1">
