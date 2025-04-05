@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -25,7 +25,6 @@ type Device = {
 const DraggableScenes = dynamic(() => import("@/components/DraggableScenes"), { ssr: false });
 const DraggableDevices = dynamic(() => import('@/components/DraggableDevices'), { ssr: false });
 const DraggableRooms = dynamic(() => import('@/components/DraggableRooms'), { ssr: false });
-
 
 const SmartHome: React.FC = () => {
   const [rooms] = useState([
@@ -83,8 +82,17 @@ const SmartHome: React.FC = () => {
     setDevices(newDevices);
   };
 
+  const bottomNavRef = useRef<HTMLDivElement | null>(null);
+  const [bottomNavHeight, setBottomNavHeight] = useState(0);
+
+  useEffect(() => {
+    if (bottomNavRef.current) {
+      setBottomNavHeight(bottomNavRef.current.offsetHeight);
+    }
+  }, [bottomNavRef]);
+
   return (
-    <div className="min-h-screen bg-[#F9F9F9]">
+    <div className="min-h-screen bg-[#F9F9F9] relative">
       {/* 顶部导航 */}
       <div className="bg-white p-4 rounded-b-xl shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -113,7 +121,7 @@ const SmartHome: React.FC = () => {
       </div>
 
       {/* 主要内容区，添加米黄色背景 */}
-      <main className="max-w-7xl mx-auto px-4 py-6 pb-20 bg-[#F6EBE1]">
+      <main className="max-w-7xl mx-auto px-4 py-6 pb-20 bg-[#F6EBE1] relative" style={{ paddingBottom: bottomNavHeight + 10, zIndex: 1 }}>
         <div className="flex flex-col lg:flex-row gap-6">
           {/* 左侧内容 */}
           <div className="flex-1">
@@ -136,7 +144,7 @@ const SmartHome: React.FC = () => {
       </main>
 
       {/* 底部导航 - 保持不变 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t">
+      <div ref={bottomNavRef} className="fixed bottom-0 left-0 right-0 bg-white border-t z-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-around py-3">
             {[

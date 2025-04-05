@@ -70,7 +70,7 @@ const DraggableScenes: React.FC = () => {
 };
 
 const SortableScene: React.FC<{ id: string; scene: any }> = ({ id, scene }) => {
-	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 	const longPressRef = useRef<NodeJS.Timeout | null>(null);
 	const isLongPress = useRef(false);
 
@@ -108,11 +108,14 @@ const SortableScene: React.FC<{ id: string; scene: any }> = ({ id, scene }) => {
 			style={{
 				transform: CSS.Transform.toString(transform),
 				transition,
-				cursor: 'grab'
+				cursor: 'grab',
+				zIndex: isDragging ? 999 : 1
 			}}
 			{...attributes}
 			className="p-4 bg-white hover:shadow-md transition-shadow relative overflow-hidden border border-[#E0E0E0]"
 			{...listeners}
+			onMouseDown={handleMouseDown}
+			onMouseUp={handleMouseUp}
 		>
 			<div className="flex items-center">
 				<div className="flex items-center justify-center bg-[#F6EBE1] rounded-full w-12 h-12 mr-3">
@@ -126,4 +129,4 @@ const SortableScene: React.FC<{ id: string; scene: any }> = ({ id, scene }) => {
 	);
 };
 
-export default DraggableScenes;
+export default DraggableScenes;    

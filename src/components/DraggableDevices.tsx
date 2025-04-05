@@ -91,6 +91,7 @@ const SortableDevice: React.FC<SortableDeviceProps> = ({ id, device, onStatusCha
 		setNodeRef,
 		transform,
 		transition,
+		isDragging
 	} = useSortable({ id });
 
 	// 检查点击是否发生在开关区域
@@ -106,6 +107,7 @@ const SortableDevice: React.FC<SortableDeviceProps> = ({ id, device, onStatusCha
 				transform: CSS.Transform.toString(transform),
 				transition,
 				cursor: 'grab', // 显示可拖拽的手型光标
+				zIndex: isDragging ? 999 : 1
 			}}
 			{...attributes}
 			className="p-4 bg-white hover:shadow-md transition-shadow relative"
@@ -124,4 +126,4 @@ const SortableDevice: React.FC<SortableDeviceProps> = ({ id, device, onStatusCha
 	);
 };
 
-export default DraggableDevices;
+export default DraggableDevices;    
