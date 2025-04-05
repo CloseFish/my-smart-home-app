@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDoorOpen } from "@fortawesome/free-solid-svg-icons";
@@ -24,8 +24,12 @@ const DraggableRooms = ({ rooms: initialRooms }: { rooms: any[] }) => {
 	const [hoveredRoom, setHoveredRoom] = useState<string | null>(null);
 
 	const sensors = useSensors(
-		useSensor(PointerSensor),
-		useSensor(TouchSensor)
+		useSensor(PointerSensor, {
+			activationConstraint: { delay: 300, tolerance: 5 }
+		}),
+		useSensor(TouchSensor, {
+			activationConstraint: { delay: 300, tolerance: 5 }
+		})
 	);
 
 	const handleDragEnd = (event: any) => {
@@ -79,45 +83,77 @@ const SortableRoom = ({
 	onHoverChange: (hover: boolean) => void;
 }) => {
 	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+	const longPressRef = useRef<NodeJS.Timeout | null>(null);
+	const isLongPress = useRef(false);
+
+	const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+		longPressRef.current = setTimeout(() => {
+			isLongPress.current = true;
+			if (listeners && listeners.onMouseDown) {
+				listeners.onMouseDown(e);
+			}
+		}, 300);
+	};
+
+	const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
+		if (longPressRef.current) {
+			clearTimeout(longPressRef.current);
+			longPressRef.current = null;
+		}
+		isLongPress.current = false;
+	};
+
+	useEffect(() => {
+		return () => {
+			if (longPressRef.current) {
+				clearTimeout(longPressRef.current);
+			}
+		};
+	}, []);
 
 	return (
 		<div
 			ref={setNodeRef}
-			{...attributes}
-			{...listeners}
-			className="relative rounded-xl overflow-hidden border-2 border-transparent transition-all duration-300"
 			style={{
 				transform: CSS.Transform.toString(transform),
 				transition,
-				height: "220px",
-				borderColor: isHovered ? "#B07C5B" : "transparent"
+				cursor: isLongPress.current ? 'grabbing' : 'grab'
 			}}
-			onMouseEnter={() => onHoverChange(true)}
-			onMouseLeave={() => onHoverChange(false)}
+			className="relative"
+			{...attributes}
+			onMouseEnter={() => !isLongPress.current && onHoverChange(true)}
+			onMouseLeave={() => !isLongPress.current && onHoverChange(false)}
 		>
-			{/* 固定外框作为蒙版 */}
-			<div className="absolute inset-0 rounded-xl overflow-hidden">
-				{/* 可放大的图片内容 */}
-				<div
-					className="absolute inset-0 transition-transform duration-300"
-					style={{
-						transform: isHovered ? "scale(1.1)" : "scale(1)",
-						zIndex: 1
-					}}
-				>
-					<Image
-						src={room.image}
-						alt={room.name}
-						fill
-						className="object-cover"
-					/>
+			<div
+				className={`rounded-xl overflow-hidden border-2 transition-all duration-300 ${isHovered ? "border-[#B07C5B]" : "border-transparent"
+					}`}
+				style={{ height: "220px" }}
+				onMouseDown={handleMouseDown}
+				onMouseUp={handleMouseUp}
+				{...listeners}
+			>
+				{/* 图片容器 */}
+				<div className="absolute inset-0 rounded-xl overflow-hidden">
+					<div
+						className="absolute inset-0 transition-transform duration-300"
+						style={{
+							transform: isHovered ? "scale(1.1)" : "scale(1)",
+						}}
+					>
+						<Image
+							src={room.image}
+							alt={room.name}
+							fill
+							className="object-cover"
+						/>
+					</div>
 				</div>
-			</div>
 
-			{/* 底部信息条（固定在蒙版内） */}
-			<div className="absolute bottom-0 left-0 right-0 h-12 bg-[#F6EBE1]/90 backdrop-blur-sm flex items-center px-3 z-10">
-				<FontAwesomeIcon icon={faDoorOpen} className="text-xs mr-2 text-[#B07C5B]" />
-				<span className="font-medium text-[#B07C5B]">{room.name}</span>
+				{/* 底部信息条 */}
+				<div className="absolute bottom-0 left-0 right-0 h-12 bg-[#F6EBE1]/90 backdrop-blur-sm flex items-center px-3 z-10">
+					<FontAwesomeIcon icon={faDoorOpen} className="text-xs mr-2 text-[#B07C5B]" />
+					<span className="font-medium text-[#B07C5B]">{room.name}</span>
+				</div>
 			</div>
 		</div>
 	);
